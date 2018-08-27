@@ -58,13 +58,6 @@ XCTestObservationCenter.shared.addTestObserver(testObserver)
 
 //URLMatcherTests.defaultTestSuite.run()
 
-let parts = "customScheme://customers/{custID:Int}/orders/{orderID:Int}".split(separator: "/")
-
-let pathArgs = parts.enumerated().filter{ $0.element.first == "{" && $0.element.last == "}" }
-
-pathArgs
-
-
 enum PathArgType: String {
     case Int
     case String
@@ -74,11 +67,12 @@ enum PathArgType: String {
 
 PathArgType(rawValue: "Bool")
 
-let pathArgs2 = pathArgs.map { (offset, element) in
-    return (offset, String(element))
-}
+let matchingURL = "customScheme://customers/{custID:Int}/orders/{orderID:Int}".split(separator: "/")
 
-pathArgs2
+enum Token {
+    case string(String)
+    case pathParams(String, PathArgType)
+}
 
 extension String {
     subscript (bounds: CountableClosedRange<Int>) -> String {
@@ -94,20 +88,10 @@ extension String {
     }
 }
 
-let pathArgs3 = pathArgs2.map { (offset, element) in
-    return (offset, element[1..<(element.count-1)])
-}
-
-pathArgs3
-
-
-let pathArgs4 = pathArgs3.map { arg -> (String, PathArgType) in
-    let (offset, element) = arg
+func tokenizePathParam(_ element: String) -> (String, PathArgType) {
     let splits = element.split(separator: ":")
     //TODO: Add check to make sure `splits` has exactly 2 elements and that paramType is not nil
     assert(splits.count == 2)
-
-
     let paramName = splits[0]
     guard let paramType = PathArgType(rawValue: String(splits[1])) else {
         fatalError()
@@ -115,8 +99,30 @@ let pathArgs4 = pathArgs3.map { arg -> (String, PathArgType) in
     return (String(paramName), paramType)
 }
 
-pathArgs4
+let pathArgs = matchingURL.map {
+    subPart -> Token in
+    if subPart.first == "{" && subPart.last == "}" {
+        let result = tokenizePathParam(String(subPart)[1..<(subPart.count - 1)])
+        return Token.pathParams(result.0, result.1)
+    } else {
+        return Token.string(String(subPart))
+    }
+}
+
+print(pathArgs)
+
+
+
+
+let url = URL(string: "customscheme://customers/123/orders/456")!
+
+url.host
+url.scheme
+url.pathComponents
+
+
 
 
 
 //: [Next](@next)
+
