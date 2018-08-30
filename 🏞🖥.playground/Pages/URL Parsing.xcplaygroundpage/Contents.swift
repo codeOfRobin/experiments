@@ -99,8 +99,11 @@ func tokenizePathParam(_ element: String) -> (String, PathArgType) {
     return (String(paramName), paramType)
 }
 
-let pathArgs = matchingURL.map {
+let tokens = matchingURL.map {
     subPart -> Token in
+    if subPart.last == ":" {
+        return Token.string(String(subPart)[0..<(subPart.count - 1)])
+    }
     if subPart.first == "{" && subPart.last == "}" {
         let result = tokenizePathParam(String(subPart)[1..<(subPart.count - 1)])
         return Token.pathParams(result.0, result.1)
@@ -109,7 +112,7 @@ let pathArgs = matchingURL.map {
     }
 }
 
-print(pathArgs)
+print(tokens)
 
 
 
@@ -121,7 +124,38 @@ url.scheme
 url.pathComponents
 
 
+let stringsToMatch = [url.scheme, url.host].compactMap{ $0 } + url.pathComponents.filter{ $0 != "/" }
+stringsToMatch
 
+var result = false
+for (token, string) in zip(tokens, stringsToMatch) {
+    switch token {
+    case .string(let patternString):
+        if patternString != string {
+            result = true
+            break
+        }
+    case .pathParams(let argName, let type):
+        switch type {
+        case .Int:
+            if let int = Int(string) {
+            }
+        case .String:
+            string
+        case .Float:
+            if let float = Float(string) {
+
+            }
+        case .Bool:
+            if string == "false" {
+
+            }
+            if string == "true" {
+
+            }
+        }
+    }
+}
 
 
 //: [Next](@next)

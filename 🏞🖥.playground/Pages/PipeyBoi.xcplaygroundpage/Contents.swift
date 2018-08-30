@@ -29,5 +29,4 @@ extension Pipeable {
     }
 }
 
-value.pipe(increment).pipe(square)
 //: [Next](@next)
