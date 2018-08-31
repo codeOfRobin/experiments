@@ -157,6 +157,9 @@ for (token, string) in zip(tokens, stringsToMatch) {
     }
 }
 
+extension LazyCollection {
+    
+}
 
 //: [Next](@next)
 
