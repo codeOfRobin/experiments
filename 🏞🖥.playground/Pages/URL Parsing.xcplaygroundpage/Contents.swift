@@ -157,9 +157,58 @@ for (token, string) in zip(tokens, stringsToMatch) {
     }
 }
 
-extension LazyCollection {
-    
+struct LazyScanIterator<Base : IteratorProtocol, ResultElement>: IteratorProtocol {
+    mutating func next() -> LazyScanIterator<Base, ResultElement>.Element? {
+        return 
+    }
 }
+///       : IteratorProtocol {
+///       mutating func next() -> ResultElement? {
+///         return nextElement.map { result in
+///           nextElement = base.next().map { nextPartialResult(result, $0) }
+///           return result
+///         }
+///       }
+///       private var nextElement: ResultElement? // The next result of next().
+///       private var base: Base                  // The underlying iterator.
+///       private let nextPartialResult: (ResultElement, Base.Element) -> ResultElement
+///     }
+///
+///     struct LazyScanSequence<Base: Sequence, ResultElement>
+///       : LazySequenceProtocol // Chained operations on self are lazy, too
+///     {
+///       func makeIterator() -> LazyScanIterator<Base.Iterator, ResultElement> {
+///         return LazyScanIterator(
+///           nextElement: initial, base: base.makeIterator(), nextPartialResult)
+///       }
+///       private let initial: ResultElement
+///       private let base: Base
+///       private let nextPartialResult:
+///         (ResultElement, Base.Element) -> ResultElement
+///     }
+///
+/// and finally, we can give all lazy sequences a lazy `scan` method:
+///
+///     extension LazySequenceProtocol {
+///       /// Returns a sequence containing the results of
+///       ///
+///       ///   p.reduce(initial, nextPartialResult)
+///       ///
+///       /// for each prefix `p` of `self`, in order from shortest to
+///       /// longest.  For example:
+///       ///
+///       ///     Array((1..<6).lazy.scan(0, +)) // [0, 1, 3, 6, 10, 15]
+///       ///
+///       /// - Complexity: O(1)
+///       func scan<ResultElement>(
+///         _ initial: ResultElement,
+///         _ nextPartialResult: (ResultElement, Element) -> ResultElement
+///       ) -> LazyScanSequence<Self, ResultElement> {
+///         return LazyScanSequence(
+///           initial: initial, base: self, nextPartialResult)
+///       }
+///     }
+
 
 //: [Next](@next)
 
